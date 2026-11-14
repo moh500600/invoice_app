@@ -1,0 +1,31 @@
+name: invoice_flutter
+publish_to: none
+description: نظام إدارة الفواتير للتأمين الطبي - واجهة Flutter مع PHP/MySQL الأصلي
+version: 1.0.0+1
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.7.0
+  dio_cookie_manager: ^3.1.1
+  cookie_jar: ^4.0.8
+  path_provider: ^2.1.4
+  intl: ^0.20.2
+  qr_flutter: ^4.1.0
+  pdf: ^3.11.1
+  printing: ^5.13.4
+  image_picker: ^1.1.2
+  share_plus: ^10.1.2
+  cross_file: ^0.3.4
+  flutter_localizations:
+    sdk: flutter
+  sqflite: ^2.4.2
+  connectivity_plus: ^7.3.2
+  http: ^1.6.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true

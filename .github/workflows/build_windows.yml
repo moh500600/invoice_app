@@ -1,0 +1,61 @@
+name: Build Windows Application (EXE)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Enable Windows Desktop Support
+        run: flutter config --enable-windows-desktop
+
+      - name: Determine Project Path
+        id: set_path
+        shell: pwsh
+        run: |
+          if (Test-Path "./invoice_flutter/pubspec.yaml") {
+            echo "project_path=./invoice_flutter" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "project_path=." >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Install Dependencies
+        run: |
+          cd ${{ steps.set_path.outputs.project_path }}
+          flutter pub get
+
+      - name: Build Windows Application (Release)
+        run: |
+          cd ${{ steps.set_path.outputs.project_path }}
+          flutter build windows --release
+
+      - name: Package Windows Release (ZIP)
+        shell: pwsh
+        run: |
+          $buildDir = "${{ steps.set_path.outputs.project_path }}/build/windows/x64/runner/Release"
+          if (-not (Test-Path $buildDir)) {
+            $buildDir = "${{ steps.set_path.outputs.project_path }}/build/windows/runner/Release"
+          }
+          Compress-Archive -Path "$buildDir/*" -DestinationPath "./InvoiceApp-Windows-EXE.zip"
+
+      - name: Upload Windows EXE as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: InvoiceApp-Windows-x64
+          path: ./InvoiceApp-Windows-EXE.zip
+          retention-days: 30
