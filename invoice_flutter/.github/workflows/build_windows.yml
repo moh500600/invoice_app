@@ -45,3 +45,4 @@ jobs:
           name: InvoiceApp-Windows-x64
           path: ./InvoiceApp-Windows-EXE.zip
           retention-days: 30
+
