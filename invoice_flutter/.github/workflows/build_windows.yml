@@ -44,6 +44,24 @@ jobs:
           cd ${{ steps.set_path.outputs.project_path }}
           flutter build windows --release
 
+      - name: Bundle Visual C++ Runtime DLLs (Fix MSVCP140.dll & VCRUNTIME140.dll)
+        shell: pwsh
+        run: |
+          $buildDir = "${{ steps.set_path.outputs.project_path }}/build/windows/x64/runner/Release"
+          if (-not (Test-Path $buildDir)) {
+            $buildDir = "${{ steps.set_path.outputs.project_path }}/build/windows/runner/Release"
+          }
+          Write-Host "Target build directory: $buildDir"
+          # Copy VC++ runtime DLLs from System32 into the release folder so the app runs out-of-the-box on any Windows machine
+          Copy-Item "C:\Windows\System32\msvcp140*.dll" -Destination $buildDir -Force -ErrorAction SilentlyContinue
+          Copy-Item "C:\Windows\System32\vcruntime140*.dll" -Destination $buildDir -Force -ErrorAction SilentlyContinue
+          # Also try MSVC Redist directory if available
+          $vcRedistPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC"
+          if (Test-Path $vcRedistPath) {
+            Get-ChildItem -Path $vcRedistPath -Recurse -Filter "*.dll" | Where-Object { $_.DirectoryName -match "x64" } | Copy-Item -Destination $buildDir -Force -ErrorAction SilentlyContinue
+          }
+          Get-ChildItem -Path $buildDir -Filter "*.dll" | Select-Object Name
+
       - name: Package Windows Release (ZIP)
         shell: pwsh
         run: |
